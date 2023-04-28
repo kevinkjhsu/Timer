@@ -29,7 +29,7 @@ timer_start = 0
 timer_active = False
 time_entered = False
 while True:
-    event, values = window.read(timeout=100)
+    event, values = window.read(timeout=10)
     # Enter number as time
     if event in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
         nums.append(event)
@@ -38,7 +38,7 @@ while True:
             nums.pop()
         timer_start = ''.join(nums)
         window["INPUT"].update(timer_start)
-        print(timer_start)
+    # Start button function
     if event == "START-STOP":
         if window["INPUT"].get():
             time_entered = True
@@ -49,20 +49,34 @@ while True:
         else:
             start_time = time()
             timer_active = True
+            if window["INPUT"].get():
+                time_entered = True
+                timer_start = window["INPUT"].get()
+    # With time entered to start. Work as a timer
     if time_entered:
-        window["START-STOP"].update("Stop")
-        lapse_time = round(float(timer_start) - time() + start_time, 2)
-        window["INPUT"].update(lapse_time)
+        if float(window["INPUT"].get()) > 0:
+            window["START-STOP"].update("Stop")
+            lapse_time = round(float(timer_start) - time() + start_time, 1)
+            window["INPUT"].update(lapse_time)
+        else:
+            time_entered = False
+            window["INPUT"].update("")
+            timer_active = False
+            window["START-STOP"].update("Start")
+            # sg.popup("Times up!", font="Arial, 20")
+    # Without time entered. Work as a stopwatch
     elif timer_active:
         window["START-STOP"].update("Stop")
-        lapse_time = round(time() - start_time, 2)
+        lapse_time = round(time() - start_time, 1)
         window["INPUT"].update(lapse_time)
+    # Reset the timer
     if event == "RESET":
         window["INPUT"].update("")
         nums = []
         timer_active = False
         start_time = 0
         lapse_time = 0
+    # Close window
     if event == "EXIT":
         window.close()
         break
